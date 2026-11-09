@@ -1,0 +1,3 @@
+app.json
+main.elf
+icon.png

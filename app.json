@@ -5,6 +5,11 @@
     "type": "native",
     "system_clock_khz": 300000,
     "version": "0.1.0",
-    "requirements": ["filesystem", "root-filesystem", "audio"],
-    "category": "tools"
+    "requirements": [
+        "filesystem",
+        "root-filesystem",
+        "audio"
+    ],
+    "category": "tools",
+    "min_firmware": "0.7.0"
 }

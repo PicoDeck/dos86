@@ -1,0 +1,4 @@
+build/
+fake86/cpu_ram.o
+fake86/cpu_tmp.o
+*.zip

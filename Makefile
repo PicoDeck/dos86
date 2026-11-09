@@ -5,7 +5,7 @@ OBJCOPY = arm-none-eabi-objcopy
 CFLAGS  = -mcpu=cortex-m33 -mthumb -std=gnu11 \
           -fpie -fno-plt -ffunction-sections -fdata-sections \
           -O2 -Wall -Wextra -Wno-unused-parameter \
-          -I. -I../../sdk/native
+          -I. -Isdk/native
 LDFLAGS = -T linker.ld \
           -Wl,--entry=picodeck_main \
           -Wl,-pie \
@@ -24,16 +24,23 @@ SRCS    = main.c backend.c scancode.c stubs.c opl.c audio_mix.c speaker.c \
 
 TARGET  = main.elf
 
-.PHONY: all clean
+.PHONY: all zip clean
 
 all: $(TARGET)
+
+# The release zip, as CI builds it, from files.txt.
+VERSION := $(shell python3 -c 'import json; print(json.load(open("app.json"))["version"])')
+zip: $(TARGET)
+	mkdir -p build
+	rm -f build/picodeck-dos86-*.zip
+	zip -9 build/picodeck-dos86-v$(VERSION).zip $$(cat files.txt)
 
 $(CPU_OBJ): fake86/cpu.c fake86/cpu.h fake86/config.h
 	$(CC) $(CFLAGS) -fno-function-sections -c fake86/cpu.c -o fake86/cpu_tmp.o
 	$(OBJCOPY) --rename-section .text=.time_critical.cpu fake86/cpu_tmp.o $(CPU_OBJ)
 	rm -f fake86/cpu_tmp.o
 
-$(TARGET): $(SRCS) $(CPU_OBJ) linker.ld ../../sdk/native/os.h ../../sdk/native/app_abi.h
+$(TARGET): $(SRCS) $(CPU_OBJ) linker.ld sdk/native/os.h sdk/native/app_abi.h sdk/native/terminal.h
 	$(CC) $(CFLAGS) $(SRCS) $(CPU_OBJ) $(LDFLAGS) -o $@
 	arm-none-eabi-strip $@
 	arm-none-eabi-size $@
